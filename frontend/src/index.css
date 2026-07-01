@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------------------------------------------------------------------------
+   Design tokens — LIGHT theme (amber #f5b942 + white / off-white / black).
+   No purple. Dark theme can be added later under a `.dark` selector.
+------------------------------------------------------------------------- */
+:root {
+  --background: #f7f6f3;   /* off-white page bg */
+  --surface: #ffffff;      /* cards / panels    */
+  --foreground: #1a1a1a;   /* near-black text   */
+  --muted: #6b7280;        /* secondary text    */
+  --border: #e8e6e1;       /* subtle borders    */
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reusable primitives */
+@layer components {
+  .card {
+    @apply bg-surface border border-border rounded-xl shadow-sm;
+  }
+  .btn-brand {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2
+           font-semibold text-black transition hover:bg-brand-500 active:bg-brand-600
+           disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-border
+           bg-surface px-4 py-2 font-medium text-foreground transition hover:bg-brand-50;
+  }
+}

@@ -1,0 +1,23 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# Settings & validation
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# Database (async) + migrations
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+greenlet==3.1.1
+
+# Auth — verify Supabase-issued JWTs
+pyjwt[crypto]==2.10.1
+
+# LLM (Groq is OpenAI-compatible; we call via httpx for full control of key rotation)
+httpx==0.28.1
+
+# Background jobs (no Redis)
+apscheduler==3.11.0

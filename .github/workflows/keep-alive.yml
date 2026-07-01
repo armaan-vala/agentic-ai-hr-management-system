@@ -1,0 +1,23 @@
+# Pings the backend /health every ~12 minutes so free-tier hosts (and Supabase)
+# never sleep from inactivity. Set the BACKEND_HEALTH_URL repo variable after deploy
+# (Settings -> Secrets and variables -> Actions -> Variables).
+name: keep-alive
+
+on:
+  schedule:
+    - cron: "*/12 * * * *" # every 12 minutes
+  workflow_dispatch: {} # allow manual run from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health
+        run: |
+          URL="${{ vars.BACKEND_HEALTH_URL }}"
+          if [ -z "$URL" ]; then
+            echo "BACKEND_HEALTH_URL not set yet — skipping (configure after deploy)."
+            exit 0
+          fi
+          echo "Pinging $URL"
+          curl -fsS --max-time 30 "$URL" && echo "\nOK"

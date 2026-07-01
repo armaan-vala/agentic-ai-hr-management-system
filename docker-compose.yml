@@ -1,0 +1,14 @@
+# Local dev orchestration. Production deploy uses each platform's own build
+# (Render/Railway for backend, Vercel for frontend) — this file is for your machine.
+services:
+  backend:
+    build: ./backend
+    container_name: talentos-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app          # hot-reload during dev
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped

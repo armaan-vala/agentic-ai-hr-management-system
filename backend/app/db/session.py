@@ -19,6 +19,10 @@ engine = create_async_engine(
     settings.database_url,
     echo=not settings.is_prod,
     pool_pre_ping=True,
+    # Supabase's connection pooler (Supavisor) doesn't play well with asyncpg's
+    # prepared-statement cache; disabling it avoids "prepared statement already
+    # exists" errors. Small perf cost, big reliability win.
+    connect_args={"statement_cache_size": 0},
 )
 
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)

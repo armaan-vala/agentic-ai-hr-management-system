@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,13 +12,21 @@ class Settings(BaseSettings):
     app_env: str = "development"
     frontend_origin: str = "http://localhost:5173"
 
+    # --- Database ---
     database_url: str = ""
-    supabase_jwt_secret: str = ""
 
-    # Raw comma-separated string from env; parsed into a list below.
+    # --- Supabase ---
+    # Base project URL, e.g. https://xxxx.supabase.co
+    supabase_url: str = ""
+    # New-style keys: publishable (browser-safe) + secret (backend only).
+    supabase_anon_key: str = ""      # sb_publishable_...
+    supabase_secret_key: str = ""    # sb_secret_...  (used later for admin user creation)
+
+    # --- Groq (comma-separated keys, rotated automatically) ---
     groq_api_keys: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
+    # --- Google OAuth (added later) ---
     google_client_id: str = ""
     google_client_secret: str = ""
 
@@ -30,6 +37,11 @@ class Settings(BaseSettings):
     @property
     def groq_keys(self) -> list[str]:
         return [k.strip() for k in self.groq_api_keys.split(",") if k.strip()]
+
+    @property
+    def jwks_url(self) -> str:
+        """Supabase publishes its JWT signing public keys here (for ECC/RSA verify)."""
+        return f"{self.supabase_url.rstrip('/')}/auth/v1/.well-known/jwks.json"
 
 
 @lru_cache

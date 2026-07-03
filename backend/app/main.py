@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import agent, chat, health
+from app.api.routes import agent, chat, google, health
 from app.core.config import settings
 
 
@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(chat.router)
 app.include_router(agent.router)
+app.include_router(google.router)
 
 
 @app.get("/")

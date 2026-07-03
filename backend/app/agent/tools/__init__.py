@@ -71,4 +71,4 @@ registry = ToolRegistry()
 
 # Import tool modules for their side effect of registering. Keep at bottom to
 # avoid circular imports.
-from app.agent.tools import leave  # noqa: E402,F401
+from app.agent.tools import email, leave  # noqa: E402,F401

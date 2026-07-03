@@ -15,6 +15,8 @@ greenlet==3.1.1
 
 # Auth — verify Supabase-issued JWTs
 pyjwt[crypto]==2.10.1
+# Encrypt Google refresh tokens at rest (also pulled by pyjwt[crypto], pinned explicitly)
+cryptography==44.0.0
 
 # LLM (Groq is OpenAI-compatible; we call via httpx for full control of key rotation)
 httpx==0.28.1

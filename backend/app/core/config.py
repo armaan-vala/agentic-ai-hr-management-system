@@ -26,9 +26,16 @@ class Settings(BaseSettings):
     groq_api_keys: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
-    # --- Google OAuth (added later) ---
+    # --- Google OAuth (Gmail send / Calendar) ---
     google_client_id: str = ""
     google_client_secret: str = ""
+    google_redirect_uri: str = "http://localhost:8000/google/callback"
+    # Where to bounce the browser back to after connecting Google.
+    google_post_connect_redirect: str = "http://localhost:5173/settings?google=connected"
+
+    # --- Secrets for OAuth state signing + token-at-rest encryption ---
+    app_secret: str = "dev-insecure-change-me"          # signs short-lived OAuth state
+    token_encryption_key: str = ""                       # Fernet key for refresh tokens
 
     @property
     def is_prod(self) -> bool:

@@ -34,6 +34,7 @@ class Tool:
     parameters: dict  # JSON schema for the arguments object
     handler: Handler
     is_action: bool = False  # True → needs human-in-the-loop approval
+    admin_only: bool = False  # only exposed to / runnable by company admins
     # Builds a human-readable one-liner for the approval prompt / Agent Console.
     summarize: Callable[[dict], str] | None = None
 
@@ -63,8 +64,13 @@ class ToolRegistry:
     def get(self, name: str) -> Tool | None:
         return self._tools.get(name)
 
-    def schemas(self) -> list[dict]:
-        return [t.openai_schema() for t in self._tools.values()]
+    def schemas(self, *, include_admin: bool = True) -> list[dict]:
+        """Tool schemas, optionally hiding admin-only tools from non-admins."""
+        return [
+            t.openai_schema()
+            for t in self._tools.values()
+            if include_admin or not t.admin_only
+        ]
 
 
 registry = ToolRegistry()

@@ -25,37 +25,52 @@ from app.models.user import Role, User
 # Deterministic ids so re-runs reuse the same rows.
 TEST_COMPANY_ID = uuid.uuid5(uuid.NAMESPACE_DNS, "talentos-test-company")
 TEST_USER_ID = uuid.uuid5(uuid.NAMESPACE_DNS, "talentos-test-user")
+TEST_ADMIN_ID = uuid.uuid5(uuid.NAMESPACE_DNS, "talentos-test-admin")
 
 
-async def seed(db) -> User:
-    company = await db.get(Company, TEST_COMPANY_ID)
-    if company is None:
-        company = Company(id=TEST_COMPANY_ID, name="Test Co", annual_leave_limit=12)
-        db.add(company)
-        await db.flush()
-
-    user = await db.get(User, TEST_USER_ID)
-    if user is None:
-        user = User(
-            id=TEST_USER_ID,
-            company_id=TEST_COMPANY_ID,
-            email="rahul@testco.com",
-            full_name="Rahul",
-            role=Role.employee,
-            leaves_used=3,  # so balance should be 12 - 3 = 9
-        )
-        db.add(user)
+async def _upsert(db, model, pk, **fields):
+    obj = await db.get(model, pk)
+    if obj is None:
+        obj = model(id=pk, **fields)
+        db.add(obj)
     else:
-        user.leaves_used = 3
+        for k, v in fields.items():
+            setattr(obj, k, v)
+    return obj
+
+
+async def seed(db) -> tuple[User, User]:
+    await _upsert(db, Company, TEST_COMPANY_ID, name="Test Co", annual_leave_limit=12)
+    await db.flush()
+
+    employee = await _upsert(
+        db, User, TEST_USER_ID,
+        company_id=TEST_COMPANY_ID, email="rahul@testco.com",
+        full_name="Rahul", role=Role.employee, leaves_used=3,
+    )
+    admin = await _upsert(
+        db, User, TEST_ADMIN_ID,
+        company_id=TEST_COMPANY_ID, email="hr@testco.com",
+        full_name="HR Admin", role=Role.admin, leaves_used=0,
+    )
+
+    # Clean prior test leave requests for deterministic runs.
+    old = (
+        await db.execute(select(LeaveRequest).where(LeaveRequest.user_id == TEST_USER_ID))
+    ).scalars().all()
+    for lr in old:
+        await db.delete(lr)
+
     await db.commit()
-    await db.refresh(user)
-    return user
+    await db.refresh(employee)
+    await db.refresh(admin)
+    return employee, admin
 
 
 async def main() -> None:
     async with SessionLocal() as db:
-        user = await seed(db)
-        print(f"User: {user.full_name} | used={user.leaves_used}\n")
+        user, admin = await seed(db)
+        print(f"Employee: {user.full_name} used={user.leaves_used} | Admin: {admin.full_name}\n")
 
         # --- Scenario 1: read tool (no approval) ---
         print("### SCENARIO 1: leave balance (read tool)")
@@ -100,6 +115,33 @@ async def main() -> None:
         print(f"LeaveRequest rows for user: {len(rows)}")
         for r in rows:
             print(f"  - {r.leave_type} {r.start_date}->{r.end_date} ({r.days}d) [{r.status.value}]")
+        pending_leave_id = rows[0].id
+
+        # --- Scenario 3: admin sees pending + approves (role-gated tools) ---
+        print("\n### SCENARIO 3: admin lists pending leaves (admin-only tool)")
+        result = await run_agent(
+            user=admin, db=db, message="Show me all pending leave requests."
+        )
+        print("REPLY:", result.reply)
+        print("TRACE tools:", [t["tool"] for t in result.trace])
+
+        # role filtering: employee must NOT see admin tools
+        emp_tools = {t["function"]["name"] for t in registry.schemas(include_admin=False)}
+        adm_tools = {t["function"]["name"] for t in registry.schemas(include_admin=True)}
+        print("employee sees decide_leave? ", "decide_leave" in emp_tools, "(should be False)")
+        print("admin sees decide_leave?    ", "decide_leave" in adm_tools, "(should be True)")
+
+        # approve the pending leave directly (tool logic) and check balance change
+        print("\n### approve pending leave -> balance should drop")
+        before = (await db.get(User, TEST_USER_ID)).leaves_used
+        ctx_admin = ToolContext(user=admin, db=db)
+        decide = registry.get("decide_leave")
+        dres = await decide.handler(
+            ctx_admin, leave_request_id=str(pending_leave_id), decision="approve"
+        )
+        after = (await db.get(User, TEST_USER_ID)).leaves_used
+        print("decide result:", dres)
+        print(f"leaves_used: {before} -> {after} (expected +2)")
 
 
 if __name__ == "__main__":

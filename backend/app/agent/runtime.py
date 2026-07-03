@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.agent.groq_pool import groq_pool
 from app.agent.tools import ToolContext, registry
 from app.models.agent_action import ActionStatus, AgentAction
-from app.models.user import User
+from app.models.user import Role, User
 
 MAX_STEPS = 6
 
@@ -32,6 +32,11 @@ def _system_prompt(user: User) -> dict:
             f"You are talking to {user.full_name or user.email} (role: {user.role.value}). "
             "Use the provided tools to fetch real data — never invent numbers, balances, "
             "or policies. If a tool returns data, answer from it concisely. "
+            "When the user asks you to perform an action (apply leave, send email, "
+            "approve a request), CALL the appropriate tool directly with your best "
+            "understanding of the arguments — do NOT ask for confirmation in text. "
+            "The system automatically pauses action tools for human approval, so a "
+            "separate confirmation from you is unnecessary. "
             "If you cannot help with the available tools, say so honestly."
         ),
     }
@@ -52,7 +57,8 @@ async def run_agent(
     history: list[dict] | None = None,
 ) -> AgentResult:
     ctx = ToolContext(user=user, db=db)
-    tools = registry.schemas()
+    is_admin = user.role == Role.admin
+    tools = registry.schemas(include_admin=is_admin)
 
     messages: list[dict] = [_system_prompt(user)]
     if history:
@@ -88,6 +94,8 @@ async def run_agent(
             tool = registry.get(name)
             if tool is None:
                 result: dict = {"error": f"unknown tool '{name}'"}
+            elif tool.admin_only and not is_admin:
+                result = {"error": "This action requires an admin."}
             elif tool.is_action:
                 # Human-in-the-loop: persist a pending action for the Agent Console
                 # and stop so a human can approve/reject before it runs.

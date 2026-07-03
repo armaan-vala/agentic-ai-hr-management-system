@@ -34,6 +34,13 @@ class Tool:
     parameters: dict  # JSON schema for the arguments object
     handler: Handler
     is_action: bool = False  # True → needs human-in-the-loop approval
+    # Builds a human-readable one-liner for the approval prompt / Agent Console.
+    summarize: Callable[[dict], str] | None = None
+
+    def summary_for(self, args: dict) -> str:
+        if self.summarize:
+            return self.summarize(args)
+        return f"Run {self.name}"
 
     def openai_schema(self) -> dict:
         return {

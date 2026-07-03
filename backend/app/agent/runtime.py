@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.groq_pool import groq_pool
 from app.agent.tools import ToolContext, registry
+from app.models.agent_action import ActionStatus, AgentAction
 from app.models.user import User
 
 MAX_STEPS = 6
@@ -88,11 +89,29 @@ async def run_agent(
             if tool is None:
                 result: dict = {"error": f"unknown tool '{name}'"}
             elif tool.is_action:
-                # Human-in-the-loop: stop and ask the admin/user to approve.
+                # Human-in-the-loop: persist a pending action for the Agent Console
+                # and stop so a human can approve/reject before it runs.
+                summary = tool.summary_for(args)
+                action = AgentAction(
+                    company_id=user.company_id,
+                    user_id=user.id,
+                    tool_name=name,
+                    summary=summary,
+                    args=args,
+                    status=ActionStatus.pending,
+                )
+                db.add(action)
+                await db.commit()
+                await db.refresh(action)
                 return AgentResult(
-                    reply=f"I need your approval to run **{name}** before proceeding.",
+                    reply=f"I'm ready to: **{summary}**. Approve to proceed.",
                     trace=trace,
-                    pending_approval={"tool": name, "args": args},
+                    pending_approval={
+                        "action_id": str(action.id),
+                        "tool": name,
+                        "args": args,
+                        "summary": summary,
+                    },
                 )
             else:
                 result = await tool.handler(ctx, **args)

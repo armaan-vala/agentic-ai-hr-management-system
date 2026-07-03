@@ -15,8 +15,11 @@ import uuid
 from sqlalchemy import select
 
 from app.agent.runtime import run_agent
+from app.agent.tools import ToolContext, registry
 from app.db.session import SessionLocal
+from app.models.agent_action import ActionStatus, AgentAction
 from app.models.company import Company
+from app.models.leave_request import LeaveRequest
 from app.models.user import Role, User
 
 # Deterministic ids so re-runs reuse the same rows.
@@ -54,16 +57,49 @@ async def main() -> None:
         user = await seed(db)
         print(f"User: {user.full_name} | used={user.leaves_used}\n")
 
+        # --- Scenario 1: read tool (no approval) ---
+        print("### SCENARIO 1: leave balance (read tool)")
         result = await run_agent(
             user=user,
             db=db,
             message="Hey, how many leave days do I have left this year?",
         )
-        print("=== AGENT REPLY ===")
-        print(result.reply)
-        print("\n=== TOOL TRACE ===")
-        for step in result.trace:
-            print(step)
+        print("REPLY:", result.reply)
+        print("TRACE:", result.trace)
+
+        # --- Scenario 2: action tool (HITL approval) ---
+        print("\n### SCENARIO 2: apply leave (action tool -> approval)")
+        result = await run_agent(
+            user=user,
+            db=db,
+            message="Please apply 2 days of sick leave from 2026-07-10 to 2026-07-11, "
+            "reason fever.",
+        )
+        print("REPLY:", result.reply)
+        print("PENDING_APPROVAL:", result.pending_approval)
+        assert result.pending_approval, "expected an approval request"
+        action_id = uuid.UUID(result.pending_approval["action_id"])
+
+        # Simulate the human approving in the Agent Console -> execute the tool.
+        action = await db.get(AgentAction, action_id)
+        print(f"AgentAction status before: {action.status.value}")
+        tool = registry.get(action.tool_name)
+        ctx = ToolContext(user=user, db=db)
+        exec_result = await tool.handler(ctx, **action.args)
+        action.status = ActionStatus.executed
+        action.result = exec_result
+        await db.commit()
+        print("EXECUTED RESULT:", exec_result)
+
+        # Verify a LeaveRequest row now exists.
+        rows = (
+            await db.execute(
+                select(LeaveRequest).where(LeaveRequest.user_id == user.id)
+            )
+        ).scalars().all()
+        print(f"LeaveRequest rows for user: {len(rows)}")
+        for r in rows:
+            print(f"  - {r.leave_type} {r.start_date}->{r.end_date} ({r.days}d) [{r.status.value}]")
 
 
 if __name__ == "__main__":

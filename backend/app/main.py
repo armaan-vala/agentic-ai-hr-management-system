@@ -6,7 +6,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import agent, chat, employees, google, health
+from app.api.routes import (
+    agent,
+    chat,
+    employees,
+    google,
+    health,
+    leaves,
+    me,
+    policies,
+)
 from app.core.config import settings
 
 
@@ -37,6 +46,9 @@ app.include_router(chat.router)
 app.include_router(agent.router)
 app.include_router(google.router)
 app.include_router(employees.router)
+app.include_router(me.router)
+app.include_router(leaves.router)
+app.include_router(policies.router)
 
 
 @app.get("/")

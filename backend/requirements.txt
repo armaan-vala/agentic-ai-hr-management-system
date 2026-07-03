@@ -24,3 +24,8 @@ httpx==0.28.1
 
 # Background jobs (no Redis)
 apscheduler==3.11.0
+
+# RAG — policy knowledge base (semantic search)
+pgvector==0.3.6
+fastembed==0.5.1          # lightweight ONNX embeddings (no torch), self-contained
+pypdf==5.1.0              # extract text from uploaded PDF policies

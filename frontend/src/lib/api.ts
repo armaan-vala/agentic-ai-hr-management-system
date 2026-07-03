@@ -28,3 +28,16 @@ export async function api<T = unknown>(
   }
   return res.json() as Promise<T>;
 }
+
+/** Multipart upload (don't set Content-Type — the browser adds the boundary). */
+export async function apiUpload<T = unknown>(path: string, form: FormData): Promise<T> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const headers: Record<string, string> = {};
+  if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+
+  const res = await fetch(`${API_URL}${path}`, { method: "POST", body: form, headers });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<T>;
+}

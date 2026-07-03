@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -78,6 +78,21 @@ async def callback(
     await db.commit()
 
     return RedirectResponse(url=settings.google_post_connect_redirect)
+
+
+@router.get("/success", response_class=HTMLResponse)
+async def success() -> str:
+    """Simple confirmation page shown after a successful local connect test."""
+    return """
+    <html><body style="font-family:system-ui;text-align:center;padding-top:80px;background:#f7f6f3">
+      <div style="display:inline-block;background:#fff;border:1px solid #e8e6e1;border-radius:16px;padding:32px 48px">
+        <div style="width:44px;height:44px;background:#f5b942;border-radius:12px;margin:0 auto 16px;
+             line-height:44px;font-weight:700;color:#000">✓</div>
+        <h2 style="margin:0">Google connected</h2>
+        <p style="color:#6b7280">Your Gmail is linked. You can close this tab.</p>
+      </div>
+    </body></html>
+    """
 
 
 @router.get("/status", response_model=StatusOut)

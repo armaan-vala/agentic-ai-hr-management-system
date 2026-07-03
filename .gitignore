@@ -21,6 +21,8 @@ dist/
 !.env.example
 *.pem
 *.key
+client_secret*.json
+credentials*.json
 
 # ---- Editor / OS ----
 .vscode/

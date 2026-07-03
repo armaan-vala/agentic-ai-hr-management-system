@@ -16,6 +16,8 @@ from app.api.routes import (
     health,
     leaves,
     me,
+    payroll,
+    payslips,
     policies,
 )
 from app.core.config import settings
@@ -53,6 +55,8 @@ app.include_router(leaves.router)
 app.include_router(policies.router)
 app.include_router(announcements.router)
 app.include_router(dashboard.router)
+app.include_router(payroll.router)
+app.include_router(payslips.router)
 
 
 @app.get("/")

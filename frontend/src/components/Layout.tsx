@@ -12,6 +12,7 @@ const NAV: NavItem[] = [
   { to: "/dashboard", label: "Home", icon: "🏠" },
   { to: "/chat", label: "Assistant", icon: "💬" },
   { to: "/leaves", label: "Leave", icon: "🌴" },
+  { to: "/payroll", label: "Payroll", icon: "💰" },
   { to: "/announcements", label: "Announcements", icon: "📣" },
   { to: "/policies", label: "Policies", icon: "📚" },
   { to: "/employees", label: "Employees", icon: "👥", adminOnly: true },

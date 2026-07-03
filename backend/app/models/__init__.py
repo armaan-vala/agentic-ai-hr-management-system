@@ -4,7 +4,9 @@ from app.models.announcement import Announcement
 from app.models.company import Company
 from app.models.google_credential import GoogleCredential
 from app.models.leave_request import LeaveRequest
+from app.models.payslip import Payslip
 from app.models.policy import Policy, PolicyChunk
+from app.models.salary_structure import SalaryStructure
 from app.models.user import User
 
 __all__ = [
@@ -13,7 +15,9 @@ __all__ = [
     "Company",
     "GoogleCredential",
     "LeaveRequest",
+    "Payslip",
     "Policy",
     "PolicyChunk",
+    "SalaryStructure",
     "User",
 ]

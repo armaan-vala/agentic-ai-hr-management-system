@@ -41,9 +41,10 @@ async def _apply_leave(
     leave_type: str,
     start_date: str,
     end_date: str,
-    reason: str = "",
+    reason: str | None = "",
 ) -> dict:
     """Create a leave request (inclusive of both dates). Runs only after approval."""
+    reason = reason or ""
     start = date.fromisoformat(start_date)
     end = date.fromisoformat(end_date)
     if end < start:
@@ -85,7 +86,7 @@ registry.register(
                 },
                 "start_date": {"type": "string", "description": "YYYY-MM-DD"},
                 "end_date": {"type": "string", "description": "YYYY-MM-DD"},
-                "reason": {"type": "string", "description": "Optional reason"},
+                "reason": {"type": ["string", "null"], "description": "Optional reason"},
             },
             "required": ["leave_type", "start_date", "end_date"],
         },

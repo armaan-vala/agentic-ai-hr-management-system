@@ -34,7 +34,7 @@ registry.register(
                 "title": {"type": "string"},
                 "body": {"type": "string"},
                 "email_everyone": {
-                    "type": "boolean",
+                    "type": ["boolean", "null"],
                     "description": "Also email all employees (from your connected Gmail)",
                 },
             },

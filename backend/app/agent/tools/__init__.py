@@ -81,6 +81,7 @@ from app.agent.tools import (  # noqa: E402,F401
     announcement,
     attendance,
     email,
+    expense,
     leave,
     payroll,
     policy,

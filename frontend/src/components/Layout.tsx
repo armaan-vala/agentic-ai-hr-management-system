@@ -14,6 +14,7 @@ const NAV: NavItem[] = [
   { to: "/leaves", label: "Leave", icon: "🌴" },
   { to: "/attendance", label: "Attendance", icon: "🕒" },
   { to: "/payroll", label: "Payroll", icon: "💰" },
+  { to: "/expenses", label: "Expenses", icon: "🧾" },
   { to: "/announcements", label: "Announcements", icon: "📣" },
   { to: "/policies", label: "Policies", icon: "📚" },
   { to: "/helpdesk", label: "Helpdesk", icon: "🎫" },

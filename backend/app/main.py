@@ -14,6 +14,7 @@ from app.api.routes import (
     chat,
     company,
     dashboard,
+    expenses,
     employees,
     google,
     health,
@@ -65,6 +66,7 @@ app.include_router(attendance.router)
 app.include_router(analytics.router)
 app.include_router(company.router)
 app.include_router(tickets.router)
+app.include_router(expenses.router)
 
 
 @app.get("/")

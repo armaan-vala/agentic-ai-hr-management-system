@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
     agent,
+    analytics,
     announcements,
     attendance,
     chat,
@@ -59,6 +60,7 @@ app.include_router(dashboard.router)
 app.include_router(payroll.router)
 app.include_router(payslips.router)
 app.include_router(attendance.router)
+app.include_router(analytics.router)
 
 
 @app.get("/")

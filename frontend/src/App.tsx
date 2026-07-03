@@ -12,6 +12,7 @@ import Payroll from "@/pages/Payroll";
 import Announcements from "@/pages/Announcements";
 import Employees from "@/pages/Employees";
 import AgentConsole from "@/pages/AgentConsole";
+import Analytics from "@/pages/Analytics";
 import Policies from "@/pages/Policies";
 import Settings from "@/pages/Settings";
 import { Spinner } from "@/components/ui";
@@ -45,6 +46,7 @@ function Shell() {
         <Route path="/policies" element={<Policies />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/employees" element={<AdminRoute><Employees /></AdminRoute>} />
+        <Route path="/analytics" element={<AdminRoute><Analytics /></AdminRoute>} />
         <Route path="/console" element={<AdminRoute><AgentConsole /></AdminRoute>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>

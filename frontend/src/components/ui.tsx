@@ -53,17 +53,19 @@ export function Label({ children }: { children: ReactNode }) {
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-brand-100 text-brand-800",
+  open: "bg-brand-100 text-brand-800",
   approved: "bg-green-100 text-green-800",
+  resolved: "bg-green-100 text-green-800",
   executed: "bg-green-100 text-green-800",
   rejected: "bg-red-100 text-red-800",
   failed: "bg-red-100 text-red-800",
 };
 
-export function Badge({ status }: { status: string }) {
+export function Badge({ status, label }: { status: string; label?: string }) {
   const cls = STATUS_STYLES[status] ?? "bg-gray-100 text-gray-700";
   return (
     <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${cls}`}>
-      {status}
+      {label ?? status}
     </span>
   );
 }

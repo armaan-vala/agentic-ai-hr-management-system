@@ -84,4 +84,5 @@ from app.agent.tools import (  # noqa: E402,F401
     leave,
     payroll,
     policy,
+    ticket,
 )

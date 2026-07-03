@@ -8,6 +8,7 @@ from app.models.leave_request import LeaveRequest
 from app.models.payslip import Payslip
 from app.models.policy import Policy, PolicyChunk
 from app.models.salary_structure import SalaryStructure
+from app.models.ticket import Ticket
 from app.models.user import User
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "Policy",
     "PolicyChunk",
     "SalaryStructure",
+    "Ticket",
     "User",
 ]

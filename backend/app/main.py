@@ -22,6 +22,7 @@ from app.api.routes import (
     payroll,
     payslips,
     policies,
+    tickets,
 )
 from app.core.config import settings
 
@@ -63,6 +64,7 @@ app.include_router(payslips.router)
 app.include_router(attendance.router)
 app.include_router(analytics.router)
 app.include_router(company.router)
+app.include_router(tickets.router)
 
 
 @app.get("/")

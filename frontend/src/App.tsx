@@ -14,6 +14,7 @@ import Employees from "@/pages/Employees";
 import AgentConsole from "@/pages/AgentConsole";
 import Analytics from "@/pages/Analytics";
 import Policies from "@/pages/Policies";
+import Helpdesk from "@/pages/Helpdesk";
 import Settings from "@/pages/Settings";
 import { Spinner } from "@/components/ui";
 
@@ -44,6 +45,7 @@ function Shell() {
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/announcements" element={<Announcements />} />
         <Route path="/policies" element={<Policies />} />
+        <Route path="/helpdesk" element={<Helpdesk />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/employees" element={<AdminRoute><Employees /></AdminRoute>} />
         <Route path="/analytics" element={<AdminRoute><Analytics /></AdminRoute>} />

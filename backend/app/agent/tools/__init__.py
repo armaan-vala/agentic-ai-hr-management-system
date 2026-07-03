@@ -79,6 +79,7 @@ registry = ToolRegistry()
 # avoid circular imports.
 from app.agent.tools import (  # noqa: E402,F401
     announcement,
+    attendance,
     email,
     leave,
     payroll,

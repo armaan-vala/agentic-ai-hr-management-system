@@ -7,6 +7,7 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Chat from "@/pages/Chat";
 import Leaves from "@/pages/Leaves";
+import Attendance from "@/pages/Attendance";
 import Payroll from "@/pages/Payroll";
 import Announcements from "@/pages/Announcements";
 import Employees from "@/pages/Employees";
@@ -38,6 +39,7 @@ function Shell() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/leaves" element={<Leaves />} />
+        <Route path="/attendance" element={<Attendance />} />
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/announcements" element={<Announcements />} />
         <Route path="/policies" element={<Policies />} />

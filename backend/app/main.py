@@ -20,6 +20,7 @@ from app.api.routes import (
     health,
     leaves,
     me,
+    meetings,
     payroll,
     payslips,
     policies,
@@ -67,6 +68,7 @@ app.include_router(analytics.router)
 app.include_router(company.router)
 app.include_router(tickets.router)
 app.include_router(expenses.router)
+app.include_router(meetings.router)
 
 
 @app.get("/")

@@ -10,6 +10,7 @@ import Leaves from "@/pages/Leaves";
 import Attendance from "@/pages/Attendance";
 import Payroll from "@/pages/Payroll";
 import Expenses from "@/pages/Expenses";
+import Meetings from "@/pages/Meetings";
 import Announcements from "@/pages/Announcements";
 import Employees from "@/pages/Employees";
 import AgentConsole from "@/pages/AgentConsole";
@@ -45,6 +46,7 @@ function Shell() {
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/expenses" element={<Expenses />} />
+        <Route path="/meetings" element={<Meetings />} />
         <Route path="/announcements" element={<Announcements />} />
         <Route path="/policies" element={<Policies />} />
         <Route path="/helpdesk" element={<Helpdesk />} />

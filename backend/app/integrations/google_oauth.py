@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import base64
 import json
+import uuid
 from email.message import EmailMessage
 from urllib.parse import urlencode
 
@@ -23,11 +24,16 @@ from app.core.config import settings
 AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
 GMAIL_SEND = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
+CALENDAR_EVENTS = "https://www.googleapis.com/calendar/v3/calendars/primary/events"
+
+# Default timezone for meetings (change per company later if needed).
+DEFAULT_TZ = "Asia/Kolkata"
 
 SCOPES = [
     "openid",
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/gmail.send",
+    "https://www.googleapis.com/auth/calendar.events",
 ]
 
 
@@ -127,3 +133,75 @@ async def send_gmail(
         )
         resp.raise_for_status()
         return resp.json()
+
+
+# --- Calendar -----------------------------------------------------------------
+async def create_calendar_event(
+    access_token: str,
+    *,
+    summary: str,
+    description: str,
+    start_iso: str,
+    end_iso: str,
+    attendees: list[str] | None = None,
+    add_meet: bool = True,
+) -> dict:
+    """Create a Calendar event (with a Google Meet link) and invite attendees."""
+    body: dict = {
+        "summary": summary,
+        "description": description,
+        "start": {"dateTime": start_iso, "timeZone": DEFAULT_TZ},
+        "end": {"dateTime": end_iso, "timeZone": DEFAULT_TZ},
+    }
+    if attendees:
+        body["attendees"] = [{"email": e} for e in attendees]
+    if add_meet:
+        body["conferenceData"] = {
+            "createRequest": {
+                "requestId": uuid.uuid4().hex,
+                "conferenceSolutionKey": {"type": "hangoutsMeet"},
+            }
+        }
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(
+            CALENDAR_EVENTS,
+            headers={"Authorization": f"Bearer {access_token}"},
+            params={"conferenceDataVersion": 1, "sendUpdates": "all"},
+            json=body,
+        )
+        resp.raise_for_status()
+        ev = resp.json()
+    return {
+        "event_id": ev.get("id"),
+        "html_link": ev.get("htmlLink"),
+        "meet_link": ev.get("hangoutLink"),
+    }
+
+
+async def list_calendar_events(access_token: str, *, time_min_iso: str, max_results: int = 10) -> list[dict]:
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.get(
+            CALENDAR_EVENTS,
+            headers={"Authorization": f"Bearer {access_token}"},
+            params={
+                "timeMin": time_min_iso,
+                "singleEvents": "true",
+                "orderBy": "startTime",
+                "maxResults": max_results,
+            },
+        )
+        resp.raise_for_status()
+        items = resp.json().get("items", [])
+    out = []
+    for ev in items:
+        start = ev.get("start", {})
+        out.append(
+            {
+                "summary": ev.get("summary", "(no title)"),
+                "start": start.get("dateTime") or start.get("date"),
+                "meet_link": ev.get("hangoutLink"),
+                "html_link": ev.get("htmlLink"),
+            }
+        )
+    return out

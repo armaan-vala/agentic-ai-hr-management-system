@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,6 +30,8 @@ def _system_prompt(user: User) -> dict:
         "role": "system",
         "content": (
             "You are TalentOS, an HR assistant for a company's employees and admins. "
+            f"The current date and time is {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC. "
+            "Use it to resolve relative times like 'tomorrow' or 'next Monday 3pm'. "
             f"You are talking to {user.full_name or user.email} (role: {user.role.value}). "
             "Use the provided tools to fetch real data — never invent numbers, balances, "
             "or policies. If a tool returns data, answer from it concisely. "

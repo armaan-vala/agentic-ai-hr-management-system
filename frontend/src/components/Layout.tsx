@@ -13,6 +13,7 @@ const NAV: NavItem[] = [
   { to: "/chat", label: "Assistant", icon: "💬" },
   { to: "/leaves", label: "Leave", icon: "🌴" },
   { to: "/attendance", label: "Attendance", icon: "🕒" },
+  { to: "/meetings", label: "Meetings", icon: "📅" },
   { to: "/payroll", label: "Payroll", icon: "💰" },
   { to: "/expenses", label: "Expenses", icon: "🧾" },
   { to: "/announcements", label: "Announcements", icon: "📣" },

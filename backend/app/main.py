@@ -8,7 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
     agent,
+    announcements,
     chat,
+    dashboard,
     employees,
     google,
     health,
@@ -49,6 +51,8 @@ app.include_router(employees.router)
 app.include_router(me.router)
 app.include_router(leaves.router)
 app.include_router(policies.router)
+app.include_router(announcements.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/")

@@ -27,18 +27,58 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Smooth scrolling + selection color */
+html {
+  scroll-behavior: smooth;
+}
+::selection {
+  background: #fbdd8e;
+}
+
+/* Micro-animations for a smoother feel */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-in {
+  animation: fadeInUp 0.22s ease-out both;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  @apply relative overflow-hidden bg-brand-50 rounded-lg;
+}
+.skeleton::after {
+  content: "";
+  @apply absolute inset-0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer 1.3s infinite;
+}
+
 /* Reusable primitives */
 @layer components {
   .card {
-    @apply bg-surface border border-border rounded-xl shadow-sm;
+    @apply bg-surface border border-border rounded-xl shadow-sm transition;
   }
   .btn-brand {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2
            font-semibold text-black transition hover:bg-brand-500 active:bg-brand-600
-           disabled:opacity-50;
+           active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-xl border border-border
-           bg-surface px-4 py-2 font-medium text-foreground transition hover:bg-brand-50;
+           bg-surface px-4 py-2 font-medium text-foreground transition hover:bg-brand-50
+           active:scale-[0.98] disabled:opacity-50;
   }
 }

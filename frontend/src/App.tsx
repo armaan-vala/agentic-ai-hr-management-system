@@ -1,10 +1,13 @@
 import type { ReactElement } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
+import { ToastProvider } from "@/components/Toast";
 import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
+import Dashboard from "@/pages/Dashboard";
 import Chat from "@/pages/Chat";
 import Leaves from "@/pages/Leaves";
+import Announcements from "@/pages/Announcements";
 import Employees from "@/pages/Employees";
 import AgentConsole from "@/pages/AgentConsole";
 import Policies from "@/pages/Policies";
@@ -13,7 +16,7 @@ import { Spinner } from "@/components/ui";
 
 function AdminRoute({ children }: { children: ReactElement }) {
   const { me } = useAuth();
-  return me?.role === "admin" ? children : <Navigate to="/chat" replace />;
+  return me?.role === "admin" ? children : <Navigate to="/dashboard" replace />;
 }
 
 function Shell() {
@@ -31,13 +34,15 @@ function Shell() {
   return (
     <Routes>
       <Route element={<Layout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/leaves" element={<Leaves />} />
+        <Route path="/announcements" element={<Announcements />} />
         <Route path="/policies" element={<Policies />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/employees" element={<AdminRoute><Employees /></AdminRoute>} />
         <Route path="/console" element={<AdminRoute><AgentConsole /></AdminRoute>} />
-        <Route path="*" element={<Navigate to="/chat" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>
   );
@@ -47,7 +52,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Shell />
+        <ToastProvider>
+          <Shell />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );

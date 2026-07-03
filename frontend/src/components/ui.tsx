@@ -75,7 +75,18 @@ export function Spinner() {
 }
 
 export function EmptyState({ text }: { text: string }) {
+  return <div className="text-center text-muted py-12 text-sm">{text}</div>;
+}
+
+export function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`skeleton h-4 ${className}`} />;
+}
+
+export function CardSkeleton() {
   return (
-    <div className="text-center text-muted py-12 text-sm">{text}</div>
+    <Card className="p-4 space-y-2">
+      <Skeleton className="w-1/3" />
+      <Skeleton className="w-2/3" />
+    </Card>
   );
 }

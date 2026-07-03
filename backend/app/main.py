@@ -12,6 +12,7 @@ from app.api.routes import (
     announcements,
     attendance,
     chat,
+    company,
     dashboard,
     employees,
     google,
@@ -61,6 +62,7 @@ app.include_router(payroll.router)
 app.include_router(payslips.router)
 app.include_router(attendance.router)
 app.include_router(analytics.router)
+app.include_router(company.router)
 
 
 @app.get("/")

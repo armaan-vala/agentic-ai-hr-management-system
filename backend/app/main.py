@@ -13,6 +13,7 @@ from app.api.routes import (
     attendance,
     chat,
     company,
+    copilot,
     dashboard,
     expenses,
     employees,
@@ -31,9 +32,13 @@ from app.core.config import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: (APScheduler jobs will be started here in a later version.)
+    # Startup: start background proactive agents.
+    from app.scheduler import start_scheduler, stop_scheduler
+
+    start_scheduler()
     yield
-    # Shutdown: place cleanup here.
+    # Shutdown.
+    stop_scheduler()
 
 
 app = FastAPI(
@@ -69,6 +74,7 @@ app.include_router(company.router)
 app.include_router(tickets.router)
 app.include_router(expenses.router)
 app.include_router(meetings.router)
+app.include_router(copilot.router)
 
 
 @app.get("/")

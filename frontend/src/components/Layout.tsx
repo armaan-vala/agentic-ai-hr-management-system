@@ -10,6 +10,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { to: "/dashboard", label: "Home", icon: "🏠" },
+  { to: "/copilot", label: "HR Copilot", icon: "🤖", adminOnly: true },
   { to: "/chat", label: "Assistant", icon: "💬" },
   { to: "/leaves", label: "Leave", icon: "🌴" },
   { to: "/attendance", label: "Attendance", icon: "🕒" },

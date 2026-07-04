@@ -5,6 +5,7 @@ from app.models.attendance import AttendanceRecord
 from app.models.company import Company
 from app.models.expense import Expense
 from app.models.google_credential import GoogleCredential
+from app.models.insight import CopilotDigest, Insight
 from app.models.leave_request import LeaveRequest
 from app.models.payslip import Payslip
 from app.models.policy import Policy, PolicyChunk
@@ -17,8 +18,10 @@ __all__ = [
     "Announcement",
     "AttendanceRecord",
     "Company",
+    "CopilotDigest",
     "Expense",
     "GoogleCredential",
+    "Insight",
     "LeaveRequest",
     "Payslip",
     "Policy",

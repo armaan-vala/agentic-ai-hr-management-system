@@ -15,6 +15,7 @@ import Announcements from "@/pages/Announcements";
 import Employees from "@/pages/Employees";
 import AgentConsole from "@/pages/AgentConsole";
 import Analytics from "@/pages/Analytics";
+import Copilot from "@/pages/Copilot";
 import Policies from "@/pages/Policies";
 import Helpdesk from "@/pages/Helpdesk";
 import Settings from "@/pages/Settings";
@@ -53,6 +54,7 @@ function Shell() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/employees" element={<AdminRoute><Employees /></AdminRoute>} />
         <Route path="/analytics" element={<AdminRoute><Analytics /></AdminRoute>} />
+        <Route path="/copilot" element={<AdminRoute><Copilot /></AdminRoute>} />
         <Route path="/console" element={<AdminRoute><AgentConsole /></AdminRoute>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>

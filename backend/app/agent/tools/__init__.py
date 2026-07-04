@@ -78,6 +78,7 @@ registry = ToolRegistry()
 # Import tool modules for their side effect of registering. Keep at bottom to
 # avoid circular imports.
 from app.agent.tools import (  # noqa: E402,F401
+    admin_ai,
     announcement,
     attendance,
     email,

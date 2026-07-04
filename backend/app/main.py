@@ -16,6 +16,7 @@ from app.api.routes import (
     company,
     copilot,
     dashboard,
+    documents,
     expenses,
     employees,
     google,
@@ -79,6 +80,7 @@ app.include_router(meetings.router)
 app.include_router(copilot.router)
 app.include_router(advisor.router)
 app.include_router(hiring.router)
+app.include_router(documents.router)
 
 
 @app.get("/")

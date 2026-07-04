@@ -17,4 +17,5 @@ COPY . .
 EXPOSE 8000
 
 # Render/Railway inject $PORT; default to 8000 locally.
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Run DB migrations on startup, then launch the server (safe on a single instance).
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

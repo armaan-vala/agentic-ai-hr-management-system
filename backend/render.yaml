@@ -1,5 +1,6 @@
-# One-time deploy config for Render. Push to GitHub, then in Render:
-# New -> Blueprint -> pick this repo. It reads this file and provisions the service.
+# One-time deploy config for Render (Docker).
+# In Render: New -> Blueprint -> pick this repo. It provisions the service from here.
+# Fill the `sync: false` secrets in the Render dashboard after the service is created.
 services:
   - type: web
     name: talentos-backend
@@ -8,16 +9,36 @@ services:
     dockerContext: ./backend
     plan: free
     healthCheckPath: /health
+    # (Migrations run automatically on container start — see backend/Dockerfile CMD.)
     envVars:
       - key: APP_ENV
         value: production
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      # --- secrets: set these in the Render dashboard ---
       - key: DATABASE_URL
-        sync: false # set in Render dashboard (secret)
-      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SECRET_KEY
         sync: false
       - key: GROQ_API_KEYS
         sync: false
-      - key: GROQ_MODEL
-        value: llama-3.3-70b-versatile
+      - key: APP_SECRET
+        sync: false
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      # your Vercel URL(s), comma-separated (set after frontend deploy)
       - key: FRONTEND_ORIGIN
-        sync: false # your Vercel URL
+        sync: false
+      # Google OAuth (set the redirect to this backend's /google/callback URL)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GOOGLE_POST_CONNECT_REDIRECT
+        sync: false

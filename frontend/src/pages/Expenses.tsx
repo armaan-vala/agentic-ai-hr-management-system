@@ -4,6 +4,7 @@ import { useAuth } from "@/auth/AuthProvider";
 import { useToast } from "@/components/Toast";
 import { PageHeader } from "@/components/Layout";
 import { Badge, Button, Card, CardSkeleton, EmptyState, Input, Label } from "@/components/ui";
+import { AiRecommendation } from "@/components/AiRecommendation";
 
 interface Expense {
   id: string;
@@ -148,17 +149,20 @@ function AdminExpenses() {
         ) : (
           <div className="space-y-2">
             {pending.map((x) => (
-              <Card key={x.id} className="p-4 flex items-center justify-between animate-in">
-                <div>
-                  <p className="font-medium text-sm capitalize">
-                    {x.employee} · {x.currency} {x.amount.toLocaleString()} · {x.category}
-                  </p>
-                  <p className="text-xs text-muted">{x.description || "—"}</p>
+              <Card key={x.id} className="p-4 animate-in">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm capitalize">
+                      {x.employee} · {x.currency} {x.amount.toLocaleString()} · {x.category}
+                    </p>
+                    <p className="text-xs text-muted">{x.description || "—"}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button disabled={busy} onClick={() => decide(x.id, "approve")}>Approve</Button>
+                    <Button variant="ghost" disabled={busy} onClick={() => decide(x.id, "reject")}>Reject</Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button disabled={busy} onClick={() => decide(x.id, "approve")}>Approve</Button>
-                  <Button variant="ghost" disabled={busy} onClick={() => decide(x.id, "reject")}>Reject</Button>
-                </div>
+                <AiRecommendation path={`/advisor/expense/${x.id}`} />
               </Card>
             ))}
           </div>

@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
+    advisor,
     agent,
     analytics,
     announcements,
@@ -75,6 +76,7 @@ app.include_router(tickets.router)
 app.include_router(expenses.router)
 app.include_router(meetings.router)
 app.include_router(copilot.router)
+app.include_router(advisor.router)
 
 
 @app.get("/")

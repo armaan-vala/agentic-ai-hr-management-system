@@ -14,6 +14,13 @@ interface Ticket {
   admin_response: string;
   created_at: string;
 }
+interface Suggestion {
+  category: string;
+  priority: string;
+  draft: string;
+  grounded: boolean;
+  sources: string[];
+}
 
 export default function Helpdesk() {
   const { me } = useAuth();
@@ -42,13 +49,6 @@ export default function Helpdesk() {
     } finally {
       setBusy(false);
     }
-  }
-
-  async function resolve(id: string) {
-    const response = window.prompt("Response to the employee (optional):") ?? "";
-    await api(`/tickets/${id}/resolve`, { method: "POST", body: JSON.stringify({ response }) });
-    toast("Ticket resolved.", "success");
-    await load();
   }
 
   return (
@@ -82,30 +82,111 @@ export default function Helpdesk() {
             <EmptyState text="No tickets." />
           ) : (
             <div className="space-y-2">
-              {tickets.map((t) => (
-                <Card key={t.id} className="p-4 animate-in">
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-sm">{t.subject}</p>
-                    <Badge status={t.status} />
-                  </div>
-                  {isAdmin && <p className="text-xs text-muted">from {t.raised_by}</p>}
-                  <p className="text-sm mt-1 whitespace-pre-wrap">{t.message}</p>
-                  {t.admin_response && (
-                    <p className="text-sm mt-2 bg-brand-50 rounded-lg p-2">
-                      <b>HR:</b> {t.admin_response}
-                    </p>
-                  )}
-                  {isAdmin && t.status === "open" && (
-                    <div className="mt-3">
-                      <Button variant="ghost" onClick={() => resolve(t.id)}>Resolve</Button>
+              {tickets.map((t) =>
+                isAdmin ? (
+                  <AdminTicketCard key={t.id} t={t} onDone={load} />
+                ) : (
+                  <Card key={t.id} className="p-4 animate-in">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-sm">{t.subject}</p>
+                      <Badge status={t.status} />
                     </div>
-                  )}
-                </Card>
-              ))}
+                    <p className="text-sm mt-1 whitespace-pre-wrap">{t.message}</p>
+                    {t.admin_response && (
+                      <p className="text-sm mt-2 bg-brand-50 rounded-lg p-2">
+                        <b>HR:</b> {t.admin_response}
+                      </p>
+                    )}
+                  </Card>
+                ),
+              )}
             </div>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+const PRIORITY_STYLE: Record<string, string> = {
+  high: "bg-red-100 text-red-800",
+  medium: "bg-brand-100 text-brand-800",
+  low: "bg-gray-100 text-gray-600",
+};
+
+function AdminTicketCard({ t, onDone }: { t: Ticket; onDone: () => void }) {
+  const toast = useToast();
+  const [sug, setSug] = useState<Suggestion | null>(null);
+  const [reply, setReply] = useState("");
+  const [loadingSug, setLoadingSug] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function suggest() {
+    setLoadingSug(true);
+    try {
+      const s = await api<Suggestion>(`/advisor/ticket/${t.id}`);
+      setSug(s);
+      if (s.draft) setReply(s.draft);
+    } finally {
+      setLoadingSug(false);
+    }
+  }
+
+  async function resolve() {
+    setBusy(true);
+    try {
+      await api(`/tickets/${t.id}/resolve`, { method: "POST", body: JSON.stringify({ response: reply }) });
+      toast("Ticket resolved.", "success");
+      onDone();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="p-4 animate-in">
+      <div className="flex items-center justify-between">
+        <p className="font-semibold text-sm">{t.subject}</p>
+        <div className="flex items-center gap-2">
+          {sug && (
+            <>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{sug.category}</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${PRIORITY_STYLE[sug.priority] ?? PRIORITY_STYLE.medium}`}>
+                {sug.priority}
+              </span>
+            </>
+          )}
+          <Badge status={t.status} />
+        </div>
+      </div>
+      <p className="text-xs text-muted">from {t.raised_by}</p>
+      <p className="text-sm mt-1 whitespace-pre-wrap">{t.message}</p>
+
+      {t.admin_response && (
+        <p className="text-sm mt-2 bg-brand-50 rounded-lg p-2"><b>HR:</b> {t.admin_response}</p>
+      )}
+
+      {t.status === "open" && (
+        <div className="mt-3 space-y-2">
+          {!sug ? (
+            <button onClick={suggest} disabled={loadingSug} className="text-xs font-semibold text-brand-700 hover:underline disabled:opacity-50">
+              🤖 {loadingSug ? "Analysing…" : "Suggest reply & triage"}
+            </button>
+          ) : (
+            <>
+              {sug.draft && (
+                <p className="text-[11px] text-muted">
+                  {sug.grounded ? "✓ Draft grounded in your policies" : "⚠️ Not fully covered by policies — please review"}
+                </p>
+              )}
+              <Textarea rows={3} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Type or edit the reply…" />
+            </>
+          )}
+          <div className="flex gap-2">
+            <Button disabled={busy} onClick={resolve}>Send & resolve</Button>
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }

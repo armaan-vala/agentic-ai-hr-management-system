@@ -25,6 +25,7 @@ from app.api.routes import (
     leaves,
     me,
     meetings,
+    nudges,
     payroll,
     payslips,
     policies,
@@ -81,6 +82,7 @@ app.include_router(copilot.router)
 app.include_router(advisor.router)
 app.include_router(hiring.router)
 app.include_router(documents.router)
+app.include_router(nudges.router)
 
 
 @app.get("/")

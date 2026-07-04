@@ -11,6 +11,7 @@ from app.db.session import get_db
 from app.models.announcement import Announcement
 from app.models.user import Role, User
 from app.services import announcements as svc
+from app.services.llm_util import json_completion
 
 router = APIRouter(prefix="/announcements", tags=["announcements"])
 
@@ -51,6 +52,27 @@ async def list_announcements(
         )
         for a in rows
     ]
+
+
+class DraftIn(BaseModel):
+    topic: str
+
+
+@router.post("/draft")
+async def draft_announcement(
+    body: DraftIn, user: User = Depends(get_current_user)
+) -> dict:
+    """AI-draft an announcement (title + body) from a short topic."""
+    if user.role != Role.admin:
+        raise HTTPException(status_code=403, detail="Admin only")
+    result = await json_completion(
+        "You are an internal-comms writer. Draft a company announcement from the topic. "
+        "Return JSON: {title (short), body (2-4 warm, clear sentences)}.",
+        f"Topic: {body.topic}",
+    )
+    if not result:
+        return {"title": body.topic, "body": ""}
+    return {"title": result.get("title", body.topic), "body": result.get("body", "")}
 
 
 @router.post("", response_model=PostResult)

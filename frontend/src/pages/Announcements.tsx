@@ -19,6 +19,23 @@ export default function Announcements() {
   const [list, setList] = useState<Announcement[] | null>(null);
   const [form, setForm] = useState({ title: "", body: "", email_everyone: false });
   const [busy, setBusy] = useState(false);
+  const [topic, setTopic] = useState("");
+  const [drafting, setDrafting] = useState(false);
+
+  async function draft() {
+    if (!topic.trim()) return;
+    setDrafting(true);
+    try {
+      const r = await api<{ title: string; body: string }>("/announcements/draft", {
+        method: "POST",
+        body: JSON.stringify({ topic }),
+      });
+      setForm({ ...form, title: r.title, body: r.body });
+      toast("Drafted by AI — edit as needed.", "success");
+    } finally {
+      setDrafting(false);
+    }
+  }
 
   async function load() {
     setList(await api<Announcement[]>("/announcements"));
@@ -56,6 +73,12 @@ export default function Announcements() {
         {isAdmin && (
           <Card className="p-6">
             <h3 className="font-semibold mb-4">New announcement</h3>
+            <div className="flex gap-2 mb-3">
+              <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Topic for AI to draft (e.g. office closed for Diwali)" />
+              <Button type="button" variant="ghost" onClick={draft} disabled={drafting || !topic.trim()}>
+                {drafting ? "Drafting…" : "🤖 Draft"}
+              </Button>
+            </div>
             <form onSubmit={post} className="space-y-3">
               <div className="space-y-1">
                 <Label>Title</Label>

@@ -8,6 +8,11 @@ interface Recent {
   title: string;
   created_at: string;
 }
+interface Nudge {
+  icon: string;
+  text: string;
+  action_path: string;
+}
 interface Dash {
   role: string;
   greeting_name: string;
@@ -22,10 +27,12 @@ interface Dash {
 
 export default function Dashboard() {
   const [d, setD] = useState<Dash | null>(null);
+  const [nudges, setNudges] = useState<Nudge[]>([]);
   const nav = useNavigate();
 
   useEffect(() => {
     api<Dash>("/dashboard").then(setD);
+    api<Nudge[]>("/nudges").then(setNudges).catch(() => setNudges([]));
   }, []);
 
   const isAdmin = d?.role === "admin";
@@ -54,6 +61,23 @@ export default function Dashboard() {
             {isAdmin ? "Here's what's happening in your company." : "Here's your snapshot."}
           </p>
         </div>
+
+        {nudges.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted uppercase tracking-wide">For you</p>
+            {nudges.map((n, i) => (
+              <button
+                key={i}
+                onClick={() => n.action_path && nav(n.action_path)}
+                style={{ animationDelay: `${i * 40}ms` }}
+                className="animate-in w-full text-left flex items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm hover:shadow-sm transition"
+              >
+                <span>{n.icon}</span>
+                <span>{n.text}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className={`grid gap-4 ${isAdmin ? "sm:grid-cols-4" : "sm:grid-cols-2"}`}>
           {!d

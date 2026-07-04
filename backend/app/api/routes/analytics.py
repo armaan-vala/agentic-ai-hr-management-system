@@ -13,6 +13,7 @@ from app.db.session import get_db
 from app.models.attendance import AttendanceRecord
 from app.models.leave_request import LeaveRequest
 from app.models.user import Role, User
+from app.services import analytics_ai
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -95,3 +96,24 @@ async def analytics(
         leaves_by_type=buckets(by_type),
         leaves_by_month=by_month,
     )
+
+
+class AskIn(BaseModel):
+    question: str
+
+
+class AskOut(BaseModel):
+    answer: str
+    metrics: dict
+
+
+@router.post("/ask", response_model=AskOut)
+async def ask(
+    body: AskIn,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> AskOut:
+    if user.role != Role.admin:
+        raise HTTPException(status_code=403, detail="Admin only")
+    res = await analytics_ai.ask(db, user.company_id, body.question)
+    return AskOut(**res)

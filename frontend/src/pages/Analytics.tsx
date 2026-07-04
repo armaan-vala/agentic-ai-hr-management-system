@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { PageHeader } from "@/components/Layout";
-import { Card, CardSkeleton, EmptyState } from "@/components/ui";
+import { Button, Card, CardSkeleton, EmptyState, Input } from "@/components/ui";
 
 interface Bucket {
   label: string;
@@ -28,6 +28,7 @@ export default function Analytics() {
     <div>
       <PageHeader title="People Analytics" subtitle="Your company at a glance" />
       <div className="p-8 max-w-4xl space-y-6">
+        <AskBox />
         <div className="grid sm:grid-cols-3 gap-4">
           {!a ? (
             <>
@@ -54,6 +55,67 @@ export default function Analytics() {
         )}
       </div>
     </div>
+  );
+}
+
+const SUGGESTED = [
+  "How many people are absent today?",
+  "What's our hiring pipeline looking like?",
+  "How many leave requests are pending?",
+];
+
+function AskBox() {
+  const [q, setQ] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function ask(question: string) {
+    if (!question.trim()) return;
+    setBusy(true);
+    setAnswer(null);
+    try {
+      const r = await api<{ answer: string }>("/analytics/ask", {
+        method: "POST",
+        body: JSON.stringify({ question }),
+      });
+      setAnswer(r.answer);
+    } catch (e) {
+      setAnswer(e instanceof Error ? e.message : "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="p-6 bg-brand-50 border-brand-200">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-lg">📊</span>
+        <h3 className="font-semibold">Ask your data</h3>
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          ask(q);
+        }}
+        className="flex gap-2"
+      >
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. How many people are on leave this month?" />
+        <Button type="submit" disabled={busy || !q.trim()}>{busy ? "Thinking…" : "Ask"}</Button>
+      </form>
+      <div className="flex flex-wrap gap-2 mt-2">
+        {SUGGESTED.map((s) => (
+          <button key={s} onClick={() => { setQ(s); ask(s); }} className="text-xs text-brand-700 hover:underline">
+            {s}
+          </button>
+        ))}
+      </div>
+      {answer && (
+        <div className="mt-3 bg-surface border border-border rounded-xl p-3 text-sm whitespace-pre-wrap animate-in">
+          {answer}
+          <p className="text-[10px] text-muted mt-2">Grounded in your live data — no invented numbers.</p>
+        </div>
+      )}
+    </Card>
   );
 }
 
